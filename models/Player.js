@@ -7,6 +7,4 @@ module.exports = class Player {
     this.game_id = null;
     this.isPlaying = false;
   }
-
-  joinGame = () => {};
 };

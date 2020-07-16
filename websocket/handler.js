@@ -3,17 +3,17 @@ const Player = require("../models/Player");
 
 module.exports = function (io) {
   // States
-  let players = [];
-  let games = [];
+  let players = new Map();
+  let games = new Map();
 
   // On connection
-  io.on(eventsName.CONNECTION, socket => {
+  io.on(eventsName.CONNECTION, (socket) => {
     console.log("Connection");
 
     // User choose name
-    socket.on(eventsName.USER_CHOOSE_NAME, name => {
+    socket.on(eventsName.USER_CHOOSE_NAME, (name) => {
       const newPlayer = new Player(name);
-      players.push(newPlayer);
+      players.set(newPlayer._id, newPlayer);
 
       socket.emit(eventsName.SEND_LOBBY_INFOS, { players, games });
 
