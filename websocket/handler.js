@@ -1,5 +1,6 @@
-const eventsName = require("./eventsName");
+const events = require("./events");
 const Player = require("../models/Player");
+const Game = require("../models/Game");
 
 module.exports = function (io) {
   // States
@@ -7,28 +8,56 @@ module.exports = function (io) {
   let games = new Map();
 
   // On connection
-  io.on(eventsName.CONNECTION, (socket) => {
+  io.on(events.CONNECTION, socket => {
     console.log("Connection");
 
     // User choose name
-    socket.on(eventsName.USER_CHOOSE_NAME, (name) => {
+    socket.on(events.USER_CHOOSE_NAME, name => {
       const newPlayer = new Player(name);
       players.set(newPlayer._id, newPlayer);
 
-      socket.emit(eventsName.SEND_LOBBY_INFOS, { players, games });
+      socket.emit(events.SEND_LOBBY_INFOS, {
+        player: newPlayer,
+        players: [...players.values()],
+        games: [...games.values()]
+      });
 
-      // Send new lobby infos to players
-      broadcastLobbyInfos(players, games, socket);
+      broadcastLobbyInfos();
 
       console.log(`${name} as joined server`);
     });
+
+    // User create game
+    socket.on(events.CREATE_GAME, creator => {
+      // Check if creator doesn't already create game
+      const game = games.forEach(game => {
+        if (game.creator._id === creator._id) return game;
+      });
+      if (game) return sendError("You already created a game");
+
+      const newGame = new Game(creator);
+      games.set(newGame._id, newGame);
+      broadcastLobbyInfos();
+    });
+
+    // Update lobby infos to players
+    function broadcastLobbyInfos() {
+      socket.emit(events.SEND_LOBBY_INFOS, {
+        players: [...players.values()],
+        games: [...games.values()]
+      });
+      socket.broadcast.emit(events.SEND_LOBBY_INFOS, {
+        players: [...players.values()],
+        games: [...games.values()]
+      });
+    }
+
+    function sendError(msg) {
+      socket.emit(events.SEND_ERROR, msg);
+    }
   });
 
-  io.on(eventsName.DISCONNECT, () => {
+  io.on(events.DISCONNECT, () => {
     console.log("Disconnected");
   });
 };
-
-function broadcastLobbyInfos(players, games, socket) {
-  socket.broadcast.emit(eventsName.SEND_LOBBY_INFOS, { players, games });
-}

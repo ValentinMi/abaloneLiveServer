@@ -1,5 +1,8 @@
-export class Game {
+const { v4: uuidv4 } = require("uuid");
+
+module.exports = class Game {
   constructor(creator) {
+    this._id = `game_${uuidv4()}`;
     this.creator = creator;
     this.playersNbr = 0;
     this.player1 = null;
@@ -16,4 +19,4 @@ export class Game {
       this.gameInProgress = true;
     }
   }
-}
+};

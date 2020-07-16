@@ -6,4 +6,5 @@ module.exports = Object.freeze({
   SEND_LOBBY_INFOS: "lobby_infos",
   CREATE_GAME: "create_game",
   GAME_CREATED: "game_created",
+  SEND_ERROR: "error"
 });
