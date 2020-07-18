@@ -1,6 +1,6 @@
 const events = require("./events");
-const Player = require("../models/Player");
-const Game = require("../models/Game");
+const Player = require("../classes/Player");
+const Game = require("../classes/Game");
 
 module.exports = function (io) {
   // States
@@ -28,7 +28,7 @@ module.exports = function (io) {
     });
 
     // User create game
-    socket.on(events.CREATE_GAME, creator => {
+    socket.on(events.USER_CREATE_GAME, creator => {
       // Check if creator doesn't already create game
       const game = games.forEach(game => {
         if (game.creator._id === creator._id) return game;
@@ -40,7 +40,52 @@ module.exports = function (io) {
       broadcastLobbyInfos();
     });
 
-    // Update lobby infos to players
+    // User join game
+    socket.on(events.USER_JOIN_GAME, ({ player, game_id }) => {
+      socket.join(game_id);
+
+      // Update Game
+      const game = games.get(game_id);
+      // If game is
+
+      if (!game.player1) {
+        game.player1 = player;
+      } else {
+        game.player2 = player;
+      }
+      game.playersNbr++;
+      games.set(game_id, game);
+
+      // Update Player
+      player.game_id = game_id;
+      players.set(player._id, player);
+
+      broadcastLobbyInfos();
+    });
+
+    // User disconnect
+    socket.on(events.USER_DISCONNECT, player => {
+      // Delete player from players Map
+      players.delete(player._id);
+      // Remove player from game he was present
+      const game = games.get(player.game_id);
+      // If he was the creator , delete the game too
+      if (game.creator._id === player._id) {
+        games.delete(player.game_id);
+      } else {
+        if (game.player1._id === player._id) {
+          game.player1 = null;
+        }
+        if (game.player2._id === player._id) {
+          arguments.player2 = null;
+        }
+      }
+      console.log(`${player.name} disconnect`);
+      broadcastLobbyInfos();
+    });
+
+    //  UTILS FUNCTIONS //
+
     function broadcastLobbyInfos() {
       socket.emit(events.SEND_LOBBY_INFOS, {
         players: [...players.values()],
@@ -57,7 +102,5 @@ module.exports = function (io) {
     }
   });
 
-  io.on(events.DISCONNECT, () => {
-    console.log("Disconnected");
-  });
+  io.on(events.DISCONNECT, () => {});
 };

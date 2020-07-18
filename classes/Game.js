@@ -14,9 +14,13 @@ module.exports = class Game {
     this.whoPlays = this.player1;
   }
 
-  startGame() {
-    if (this.playersNbr === 2 && this.player1 && this.player2) {
-      this.gameInProgress = true;
-    }
+  // startGame() {
+  //   if (this.playersNbr === 2 && this.player1 && this.player2) {
+  //     this.gameInProgress = true;
+  //   }
+  // }
+
+  initGame() {
+    const JSON_gameBoard = "";
   }
 };
