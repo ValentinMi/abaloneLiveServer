@@ -6,5 +6,6 @@ module.exports = class Player {
     this.name = name;
     this.game_id = null;
     this.isPlaying = false;
+    this.isReady = false;
   }
 };

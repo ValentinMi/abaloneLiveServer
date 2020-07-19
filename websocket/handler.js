@@ -37,6 +37,9 @@ module.exports = function (io) {
 
       const newGame = new Game(creator);
       games.set(newGame._id, newGame);
+
+      socket.emit(events.GAME_CREATED, newGame._id);
+
       broadcastLobbyInfos();
     });
 
@@ -61,6 +64,27 @@ module.exports = function (io) {
       players.set(player._id, player);
 
       broadcastLobbyInfos();
+    });
+
+    // User is ready
+    socket.on(events.USER_READY, ({ player, game_id }) => {
+      player.isReady = true;
+      players.set(player._id, player);
+
+      // Reassign player to game
+      const game = games.get(game_id);
+      if (game.player1._id === player._id) {
+        game.player1 = player;
+      }
+      if (game.player2._id === player._id) {
+        game.player2 = player;
+      }
+
+      // If players are ready  => Start game
+      if (game.player1.isReady && game.player2.isReady) {
+        socket.to(game_id).broadcast(events.GAME_START);
+        game.gameInProgress = true;
+      }
     });
 
     // User disconnect

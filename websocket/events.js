@@ -5,8 +5,10 @@ module.exports = Object.freeze({
   USER_CREATE_ROOM: "user_create_room",
   USER_JOIN_GAME: "user_join_game",
   USER_CREATE_GAME: "user_create_game",
+  USER_READY: "user_ready",
+  GAME_CREATED: "game_created",
+  GAME_START: "game_start",
   USER_DISCONNECT: "user_disconnect",
   SEND_LOBBY_INFOS: "lobby_infos",
-  GAME_CREATED: "game_created",
   SEND_ERROR: "error"
 });
